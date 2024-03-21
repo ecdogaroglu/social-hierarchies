@@ -12,14 +12,15 @@ from social_hierarchies.dynamics.graph import (
 )
 
 
-def plot_stationary_distr(states, trans_matrix_p):
+def plot_stationary_distr(states, trans_matrix,index=0):
     """Create the plot for the stationary distribution.
 
     Args:
         states (numpy.ndarray): Three dimensional array representing the state space of the stochastic process,
                             where each state is a play history of size m.
                             Dimensions are ((num_act**num_players)**m) x m x num_players
-        trans_matrix_up (numpy.ndarray): The transition matrix of the perturbed process.
+        trans_matrix (numpy.ndarray): The transition matrix of the process.
+        index (int): Index of the stationary distribution. Default is set to the first one, other distributions can be accessed when there are multiple ones.
 
     Returns:
         numpy.ndarray : Linear space for plotting.
@@ -28,8 +29,8 @@ def plot_stationary_distr(states, trans_matrix_p):
     """
     num_states = states.shape[0]
 
-    mc = qe.MarkovChain(trans_matrix_p)
-    s_distr = mc.stationary_distributions[0]
+    mc = qe.MarkovChain(trans_matrix)
+    s_distr = mc.stationary_distributions[index]
     x = np.linspace(0, num_states - 1, num_states)
 
     return x, s_distr

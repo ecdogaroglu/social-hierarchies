@@ -94,7 +94,7 @@ def _trans_prob_unperturbed(pre, suc, k, num_act, payoffs):
                 level_out = []
 
                 for j in range(pre.shape[0]):
-                    level_prob = pl_pos_is_s(0,j,suc[j][-1][0],payoffs,pre) * pl_pos_is_s(1,j,suc[j][-1][1],payoffs,pre)
+                    level_prob = pl_pos_is_s(0,j,suc[j][-1][0],payoffs,pre, k, num_act) * pl_pos_is_s(1,j,suc[j][-1][1],payoffs,pre, k, num_act)
                     level_out.append(level_prob)
                     
                 level_out = np.array(level_out)
@@ -144,7 +144,7 @@ def _trans_prob_perturbed(pre, suc, k, epsilon, num_act, payoffs):  # doesnt sup
                 mistake = []
 
                 for a in range(pre.shape[0]):
-                    add = pl_pos_is_s(0,a,suc[a][-1][0],payoffs,pre) * pl_pos_is_s(1,a,suc[a][-1][1],payoffs,pre)
+                    add = pl_pos_is_s(0,a,suc[a][-1][0],payoffs,pre,k,num_act) * pl_pos_is_s(1,a,suc[a][-1][1],payoffs,pre,k,num_act)
                     no_mistake.append(add)
 
                 for a in range(pre.shape[0]):

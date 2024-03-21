@@ -15,7 +15,35 @@ from social_hierarchies.final.plot import (
 )
 
 
-def task_plot_stationary_distr(
+def task_plot_stationary_distr_unperturbed(
+    states_dir=BLD / "python" / "game" / "states.npy",
+    trans_matrix_un_dir=BLD / "python" / "dynamics" / "trans_matrix_un.npy",
+):
+    """Plot the stationary distributions of the unperturbed process."""
+
+    states = np.load(states_dir)
+    trans_matrix_un = np.load(trans_matrix_un_dir)
+
+    x, s_distr_0 = plot_stationary_distr(states, trans_matrix_un, index=0)
+
+    plt.figure(0)
+    plt.plot(x, s_distr_0, color="k")
+    plt.savefig(BLD / "python" / "figures" / "s_distr_un_0.png")
+
+    x, s_distr_1 = plot_stationary_distr(states, trans_matrix_un, index=1)
+
+    plt.figure(1)
+    plt.plot(x, s_distr_1, color="k")
+    plt.savefig(BLD / "python" / "figures" / "s_distr_un_1.png")
+
+    x, s_distr_2 = plot_stationary_distr(states, trans_matrix_un, index=2)
+
+    plt.figure(2)
+    plt.plot(x, s_distr_2, color="k")
+    plt.savefig(BLD / "python" / "figures" / "s_distr_un_2.png")
+
+
+def task_plot_stationary_distr_perturbed(
     states_dir=BLD / "python" / "game" / "states.npy",
     trans_matrix_p_dir=BLD / "python" / "dynamics" / "trans_matrix_p.npy",
     produces=BLD / "python" / "figures" / "s_distr.png",
@@ -25,10 +53,10 @@ def task_plot_stationary_distr(
     states = np.load(states_dir)
     trans_matrix_p = np.load(trans_matrix_p_dir)
 
-    x, s_distr = plot_stationary_distr(states, trans_matrix_p)
+    x, s_distr_p = plot_stationary_distr(states, trans_matrix_p)
 
-    plt.figure(2)
-    plt.plot(x, s_distr, color="k")
+    plt.figure(5)
+    plt.plot(x, s_distr_p, color="k")
     plt.savefig(produces)
 
 
@@ -53,7 +81,7 @@ def task_plot_edmonds_arboresence(
         states, k, num_act, payoffs, trans_matrix_un
     )
 
-    plt.figure(0)
+    plt.figure(6)
     pos = nx.spring_layout(arb, seed=7)
     nx.draw(
         arb,
@@ -95,7 +123,7 @@ def task_plot_G_rcc(
         states, k, num_act, payoffs, trans_matrix_un
     )
 
-    plt.figure(1)
+    plt.figure(7)
     pos = nx.spring_layout(G_rcc, seed=7)
     nx.draw(
         G_rcc,

@@ -1,1 +1,1 @@
-"""Code for producing the results of the Social Hierarchies with Strategic Ability project."""
+"""Code for producing the results of the Reproducible Research Template project."""

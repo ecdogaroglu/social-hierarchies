@@ -61,10 +61,11 @@ def task_plot_stationary_distr_perturbed(
     plt.plot(x, s_distr_p, color="k")
     plt.savefig(produces)
 
-
+@pytask.mark.try_last
 def task_plot_G_rcc(
     states_dir=BLD / "python" / "game" / "states.npy",
     trans_matrix_un_dir=BLD / "python" / "dynamics" / "trans_matrix_un.npy",
+    G_dir = BLD / "python" / "dynamics" / "G.net",
     parameters_dir=BLD / "python" / "game" / "parameters.pkl",
     produces=BLD / "python" / "figures" / "G_rcc.png",
 ):
@@ -78,35 +79,24 @@ def task_plot_G_rcc(
     k = parameters["k"]
     num_act = parameters["num_act"]
     payoffs = parameters["payoffs"]
+    G = nx.read_pajek(G_dir)
 
     G_rcc, labels, edge_labels = plot_rcc_graph(
-        states, k, num_act, payoffs, trans_matrix_un
+        G, states, k, num_act, payoffs, trans_matrix_un
     )
 
     plt.figure(6)
     pos = nx.spring_layout(G_rcc, seed=7)
-    nx.draw(
-        G_rcc,
-        with_labels=True,
-        pos=pos,
-        labels=labels,
-        font_weight="normal",
-        width=0.5,
-        arrows=True,
-        arrowsize=30,
-        margins=0.2,
-        node_color="white",
-        font_size=8,
-        node_size=1000,
-        connectionstyle="arc3, rad = 0.3",
-    )
-    nx.draw_networkx_edge_labels(G_rcc, pos=pos, edge_labels=edge_labels, font_size=8)
+    nx.draw(G_rcc, pos=pos, with_labels=True, labels=labels, node_size=10000, margins=0.2, font_size=12, font_weight="bold", arrowsize=30)
+    nx.draw_networkx_edge_labels(G_rcc, pos, edge_labels=edge_labels, label_pos=0.5, font_size=12)
+
     plt.savefig(produces)
 
 @pytask.mark.try_last
-def task_plot_G_shortest_path(
+def task_plot_G_sp_example(
     states_dir=BLD / "python" / "game" / "states.npy",
     parameters_dir=BLD / "python" / "game" / "parameters.pkl",
+    G_dir = BLD / "python" / "dynamics" / "G.net",
     produces=BLD / "python" / "figures" / "G_sp_ex.png",
 ):
     """Plot the shortest path between two recurrent communication classes."""
@@ -118,9 +108,11 @@ def task_plot_G_shortest_path(
     k = parameters["k"]
     num_act = parameters["num_act"]
     payoffs = parameters["payoffs"]
+    G = nx.read_pajek(G_dir)
+
 
     G_sp_ex, sp_labels, sp_edge_labels = plot_shortest_path_example(
-        states, k, num_act, payoffs
+        G, states, k, num_act, payoffs
     )
 
     plt.figure(7)
@@ -130,10 +122,11 @@ def task_plot_G_shortest_path(
     nx.draw_networkx_edge_labels(G_sp_ex, pos, edge_labels=sp_edge_labels, label_pos=0.5, font_size=12)
     plt.savefig(produces)
 
-
+@pytask.mark.try_last
 def task_plot_edmonds_arboresence(
     states_dir=BLD / "python" / "game" / "states.npy",
     trans_matrix_un_dir=BLD / "python" / "dynamics" / "trans_matrix_un.npy",
+    G_dir = BLD / "python" / "dynamics" / "G.net",
     parameters_dir=BLD / "python" / "game" / "parameters.pkl",
     produces=BLD / "python" / "figures" / "edmonds_arboresence.png",
 ):
@@ -147,9 +140,11 @@ def task_plot_edmonds_arboresence(
     k = parameters["k"]
     num_act = parameters["num_act"]
     payoffs = parameters["payoffs"]
+    G = nx.read_pajek(G_dir)
+
 
     arb, labels, edge_labels = plot_edmonds_arboresence(
-        states, k, num_act, payoffs, trans_matrix_un
+        G, states, k, num_act, payoffs, trans_matrix_un
     )
 
     plt.figure(8)
@@ -173,10 +168,11 @@ def task_plot_edmonds_arboresence(
     plt.savefig(produces)
 
 
-
+@pytask.mark.try_last
 def task_plot_multiple_min_arbs(
     states_dir=BLD / "python" / "game" / "states.npy",
     trans_matrix_un_dir=BLD / "python" / "dynamics" / "trans_matrix_un.npy",
+    G_dir = BLD / "python" / "dynamics" / "G.net",
     parameters_dir=BLD / "python" / "game" / "parameters.pkl",
     produces=BLD / "python" / "figures" / "num_arbs.npy",
 ):
@@ -190,8 +186,9 @@ def task_plot_multiple_min_arbs(
     k = parameters["k"]
     num_act = parameters["num_act"]
     payoffs = parameters["payoffs"]
+    G = nx.read_pajek(G_dir)
 
-    arbs = find_states_with_min_stoch_pot(states, trans_matrix_un, k, num_act, payoffs)[
+    arbs = find_states_with_min_stoch_pot(G, states, trans_matrix_un, k, num_act, payoffs)[
         0
     ]
 

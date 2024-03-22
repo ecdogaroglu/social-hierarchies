@@ -8,7 +8,7 @@ from social_hierarchies.dynamics.probabilities import pl_pos_is_s
 from social_hierarchies.dynamics.markov_chain import compute_rcc_index, ___index_to_state
 
 
-def find_edmonds_arboresence(states, trans_matrix_un, k, num_act, payoffs):
+def find_edmonds_arboresence(G, states, trans_matrix_un, k, num_act, payoffs):
     """Create the directed graph for recurrent communication classes of the unperturbed
     process and find max arboresence (RCC with minimum stochastic potential) using the
     Edmond (1967)'s algorithm. Returns only one such arboresence even if there are
@@ -28,7 +28,6 @@ def find_edmonds_arboresence(states, trans_matrix_un, k, num_act, payoffs):
 
     """
     rcc_index = compute_rcc_index(trans_matrix_un)
-    G = _create_directed_graph(states, k, num_act, payoffs)
     G_rcc = _create_rcc_graph(states, k, num_act, rcc_index, G, payoffs)
 
     ed = nx.algorithms.tree.branchings.Edmonds(G_rcc)
@@ -164,11 +163,11 @@ def __total_resistance(source, target, states, k, num_act, G, payoffs):
         int : Sum of resistances along the shortest path from one RCC to another.
 
     """
-    s_p = nx.algorithms.shortest_path(G, source=source, target=target, weight="weight")
+    s_p = nx.algorithms.shortest_path(G, source= f"{source}", target=f"{target}", weight="weight")
     res = 0
     for i in range(len(s_p) - 1):
-        pre = s_p[i]
-        suc = s_p[i + 1]
+        pre = int(s_p[i])
+        suc = int(s_p[i + 1])
         res += __resistance(states[pre], states[suc], k, num_act, payoffs)
 
     res = int(res)
@@ -176,7 +175,7 @@ def __total_resistance(source, target, states, k, num_act, G, payoffs):
     return res
 
 
-def find_states_with_min_stoch_pot(states, trans_matrix_un, k, num_act, payoffs):
+def find_states_with_min_stoch_pot(G, states, trans_matrix_un, k, num_act, payoffs):
     """Create the directed graph for recurrent communication classes of the unperturbed
     process and find all RCCs with minimum stochastic potential using the Edmond
     (1967)'s algorithm.
@@ -195,7 +194,6 @@ def find_states_with_min_stoch_pot(states, trans_matrix_un, k, num_act, payoffs)
 
     """
     rcc_index = compute_rcc_index(trans_matrix_un)
-    G = _create_directed_graph(states, k, num_act, payoffs)
     G_rcc = _create_rcc_graph(states, k, num_act, rcc_index, G, payoffs)
 
     arbs, root_states = _root_states(states, G_rcc, rcc_index)
@@ -287,12 +285,12 @@ def __find_root_state(states, arb, rcc_index):
 
 
 def _edges_sp_graph(source,target, states, G, k, num_act, payoffs):
-    sp = nx.algorithms.shortest_path(G, source=source, target=target, weight="weight")
+    sp = nx.algorithms.shortest_path(G, source= f"{source}", target=f"{target}", weight="weight")
     res = 0
     plot = []
     for i in range(len(sp)-1):
-        pre = sp[i]
-        suc = sp[i + 1]
+        pre = int(sp[i])
+        suc = int(sp[i + 1])
         res = __resistance(states[pre],states[suc], k, num_act, payoffs)
         plot.append((pre,suc,res))
     

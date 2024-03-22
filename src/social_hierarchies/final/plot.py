@@ -6,7 +6,6 @@ import quantecon as qe
 
 from social_hierarchies.dynamics.graph import (
     compute_rcc_index,
-    _create_directed_graph,
     _create_rcc_graph,
     find_edmonds_arboresence,
     _edges_sp_graph,
@@ -37,7 +36,7 @@ def plot_stationary_distr(states, trans_matrix,index=0):
     return x, s_distr
 
 
-def plot_rcc_graph(states, k, num_act, payoffs, trans_matrix_un):
+def plot_rcc_graph(G, states, k, num_act, payoffs, trans_matrix_un):
     """Create the plot for the RCC graph.
 
     Args:
@@ -55,7 +54,6 @@ def plot_rcc_graph(states, k, num_act, payoffs, trans_matrix_un):
 
     """
     rcc_index = compute_rcc_index(trans_matrix_un)
-    G = _create_directed_graph(states, k, num_act, payoffs)
     G_rcc = _create_rcc_graph(states, k, num_act, rcc_index, G, payoffs)
 
     indices = list(G_rcc.nodes())
@@ -68,7 +66,7 @@ def plot_rcc_graph(states, k, num_act, payoffs, trans_matrix_un):
     return G_rcc, labels, edge_labels
 
 
-def plot_shortest_path_example(states, k, num_act, payoffs):
+def plot_shortest_path_example(G, states, k, num_act, payoffs):
     """Create the plot for an example shortest path between the recurrent communication classes.
 
     Args:
@@ -85,7 +83,6 @@ def plot_shortest_path_example(states, k, num_act, payoffs):
         dict : Numpy array containing the edge labels.
 
     """
-    G = _create_directed_graph(states, k, num_act, payoffs)
 
     G_sp_ex = nx.DiGraph()
     G_sp_ex.add_weighted_edges_from(_edges_sp_graph(0,255,states,G, k, num_act, payoffs))
@@ -99,7 +96,7 @@ def plot_shortest_path_example(states, k, num_act, payoffs):
     return G_sp_ex, sp_labels, sp_edge_labels
 
 
-def plot_edmonds_arboresence(states, k, num_act, payoffs, trans_matrix_un):
+def plot_edmonds_arboresence(G, states, k, num_act, payoffs, trans_matrix_un):
     """Create the plot for the Edmond's arboresence.
 
     Args:
@@ -118,7 +115,7 @@ def plot_edmonds_arboresence(states, k, num_act, payoffs, trans_matrix_un):
         dict : Numpy array containing the edge labels.
 
     """
-    arb = find_edmonds_arboresence(states, trans_matrix_un, k, num_act, payoffs)
+    arb = find_edmonds_arboresence(G, states, trans_matrix_un, k, num_act, payoffs)
     indices = list(arb.nodes())
     labels = {}
     for i in indices:

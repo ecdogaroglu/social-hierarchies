@@ -268,7 +268,7 @@ def __find_root_state(states, arb, rcc_index):
         rcc_index (list): Indicies of the recurrent communication classes according to the ordering of the state space.
 
     Returns:
-        numpy.ndarray : Array containing the root state of these arboresence.
+        numpy.ndarray : Array containing the root state of this arboresence.
 
     """
     edges = np.array(list((arb.edges)))
@@ -295,3 +295,29 @@ def _edges_sp_graph(source,target, states, G, k, num_act, payoffs):
         plot.append((pre,suc,res))
     
     return plot
+
+
+def __find_root_index(arb, rcc_index):
+    """Find the root state of a given arboresence.
+
+    Args:
+        states (numpy.ndarray): Three dimensional array representing the state space of the stochastic process,
+                            where each state is a play history of size m.
+                            Dimensions are ((num_act**num_players)**m) x m x num_players
+        arb (networkx.classes.digraph.DiGraph) : The arboresence whose root is found.
+        rcc_index (list): Indicies of the recurrent communication classes according to the ordering of the state space.
+
+    Returns:
+        numpy.ndarray : Array containing the root state of this arboresence.
+
+    """
+    edges = np.array(list((arb.edges)))
+
+    targets = []
+    for i in range(edges.shape[0]):
+        targets.append(int(edges[i][1]))
+
+    targets = np.array(targets)
+    root_index = list(np.setdiff1d(rcc_index, targets))
+
+    return root_index

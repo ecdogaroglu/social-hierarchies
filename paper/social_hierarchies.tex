@@ -79,48 +79,147 @@
 \clearpage
 
 
-\section{Introduction} % (fold)
-\label{sec:introduction}
+\section*{Introduction}
+This paper explores the dynamics of social hierarchies where agents possess strategic decision making abilities. Such abilities allow the agents to "have a say" on their lifetime destiny by responding optimally to the past play, while they are still subject to limitations of their social environment. A similar social structure is given by \citet{vega2000unfolding} -henceforth Vega- with the fundamental difference that, in that paper, players simply imitate actions of the highest-level individuals without any sophisticated decision making. To implement this component, I deploy the adaptive play framework from \citet{young1993evolution} -henceforth Young- where agents react optimally to a limited sample of the past play. This adaptation leads to new technical challenges; for example the state space becomes considerably more complex compared to both papers and the social mobility dynamics lead to complicated transition procedures between different states of the stochastic process.
 
-If you are using this template, please cite this item from the references:
-\citet{GaudeckerEconProjectTemplates}.
+I interpret the actions taken by adaptive play as \textit{good responses} in the sense that, while they are not necessarily the best response to the whole social memory, they are best responses to a specific sample from it. In particular, one could expect that an increased sample size might lead to a \textit{better} response and faster convergence to a convention. I would like to exploit this property in the social hierarchy, in that, higher levels of the hierarchy have higher capacity of social memory and similarly higher capacities of individual sampling i.e. a more sophisticated information technology. This heightened sophistication thus shall lead to "more stable" conventions, where "things don't move" as much as lower levels. For a real life example one could think of highly structured manners of the aristocracy and rather "random" behavior of lower classes that include more mistakes. Climbing on the social hierarchy thus also gives an individual access to the better information technology and thus a chance to make more optimal decisions. A technical issue here is that the information on each level must be still insufficient enough for the adaptive play to converge to a Nash equilibrium.
 
-The data set for the example project is taken from
-\url{https://www.stem.org.uk/resources/elibrary/resource/28452/large-datasets-stats4schools}.
-It contains data on smoking habits in the UK, with 1691 observations and 12 variables.
-We consider only 4 of the 12 features for the prediction of the variable
-\texttt{smoking}: \texttt{marital\_status}, \texttt{highest\_qualification},
-\texttt{gender} and \texttt{age}. We model the dependence using a Logistic model. All
-numerical features are included linearly, while categorical features are expanded into
-dummy variables. Figures below illustrate the model predictions over the lifetime. You
-will find one figure and one estimation summary table for each installed programming
-language.
+Social mobility among different levels of the social hierarchy is governed by a rule based on the outcome of an n-player game that is played once at each level and period. Typically players who achieve the best results get a chance to be promoted to a higher level, while the ones who have the worst results face the risk of demotion to a lower one. As opposed to Vega, I will not partition each level into different classes, both because adaptive play allows for an n-player game and because I aim to keep record of each play. The latter is not an issue at Vega, since the state space in that paper is simply an array of frequency distributions and thus don't record the game history in higher complexity. However, it might be possible to allow for different number of players among different levels, for example, higher levels of the social hierarchy might be less crowded. Initially, I will assume that only one person is promoted/demoted at each level to keep the calculations simple, although it may also be possible to allow for higher numbers or perhaps even to condition social mobility on an event, like the one where the average of within-level payoffs falls below the average of one level lower's i.e. when things start to generally go bad for that level. Another simplifying assumption will be that each player who is promoted, takes the place of the player who is demoted at the level to which she transitions. This assumption simplifies the "keeping track" of the state space, if more transitions per period are allowed, one could assume a random placement. It turns out that beyond simplification, this assumption also grants an evolutionary advantage for demoted players, as they will continue to sample from an opponents' history that led to a promotion in the last period and similarly a disadvantage to the newly promoted. Again it seems to be a sensible dynamic that's also easy to observe in real situations, since it's likely that someone will be more welcomed while transitioning to a lower level than vice versa.
+
+As of now, I'm uncertain whether birth and death dynamics should be included. If this is the case however, I would wish to allow introducing birth to every level of the hierarchy as opposed to Vega, since I intend to model a general social structure and not an industrial organization.
+
+Regarding the analysis, I intend to follow the perturbation technique that's introduced by Young to identify the stochastically stable conventions. To do so, one needs to find a \textit{regular perturbation} of the original Markov chain. I am also interested to see whether the stochastically stable conventions vary within the social levels. What leads me to think that there might be such a variation is that, the play considered here actually differs from the adaptive play due to the social mobility dynamics. More precisely, the transitioning agents   carry their action with them during the transition. In other words, winning actions and their wisdom are carried to the top one at a time, while the losing actions accumulate in the bottom. Without forced promotion / demotion one could also argue that social mobility should be less possible as the process evolves due to this reason. However, conditioning the promotion process to between level success seems to be a challenging task. One other feature to think about might be allowing for different games at each level, maybe one where payoffs are linearly scaled towards the top levels to increase the aggregate risk of the play.
+
+\section*{The Model}
+There are l different hierarchical levels where each level includes n agents. A weakly acyclic n player normal form game is played each period once at each level. The game history is separate for each level and has the size $m_l$. At the beginning of each period, each class gathers their own sample from this history, which is of size $k_l$. Thus in each period and at each level one game is being played and for each game players follow the adaptive play. 
+
+The state space is rather similar to that of Young's, where each history $h$ involves a set of $m$ most recent past plays $(s(1), s(2),...,s(m))$ with the major distinction that there is a history of size $m_j$ for every level $j$, thus a typical element of the state space is z = $h_1(m_1),...,h_l(m_l)$. 
+
+\paragraph{Social Mobility.}
+
+An integral part of the model is the movement of players across the levels. Each period, someone with the highest period payoff will be promoted (demoted) to one level higher (lower), except for the $lth$ ($1st$) level, where ties are broken uniformly. The number of players within each level thus stays the same. This transition specifically involves players taking each others' positions, so we can't think of the population as a partition to n-classes, where each such class involves individuals of the same type as in Young and Vega. At least, such a partition could only involve classes that are singletons. 
+
+As we need to keep track of the recent histories for the best reply dynamics and thus we can't reduce the state space to action frequencies; the promotion procedure also cannot be as simple as in Vega, where only these frequencies are updated between the periods. Instead, while calculating the transition probability to a target state $z'$, we need to consider whether each action in each of its histories' last element is taken by someone who
+
+(i) kept their position, 
+
+(ii) has been promoted to this position or 
+
+(iii) has been demoted to this position. 
+
+In other words, only the players who stayed at or moved to the level j after the play at period t can influence the history of j at period t+1. 
+
+
+\begin{table}
+\begin{center}
+    
+    \setlength{\extrarowheight}{2pt}
+    \begin{tabular}{cc|c|c|}
+      & \multicolumn{1}{c}{} & \multicolumn{1}{c}{$A$}  & \multicolumn{1}{c}{$B$} \\\cline{3-4}
+      & $A$ & $1,1$ & $0,-1$ \\\cline{3-4}
+      & $B$ & $-1,0$ & $1,1$ \\\cline{3-4}
+    \end{tabular}
+
+\end{center}
+    \caption{A 2x2 coordination game}
+\end{table}
+
+As an example and to inspect certain properties closely, consider the symmetric 2x2 coordination game at Table 1 as a stage game played at the level $j$ and period $t$. Let $m=2$, $k=1$ and $h_j=[[AB],[BA]]$ so that the row player has played action A at $t-2$ and action B at $t-1$ and the column player has played action B at $t-2$ and action A at $t-1$. With uniform sampling assumption, each player has equal probability of sampling both actions to which their best replies are simply matching the action that they sampled. Further, each outcome has an equal probability of occurrence so each player has the same expected utility and has an equal probability of being promoted (ties are broken uniformly). A yet rather interesting observation here is that, while playing A leads to either a tie or a direct promotion - so a promotion probability of 75\% in this case - playing B leads to either a demotion or a tie - a promotion probability of only 25\% -. Thus, optimizing to earn the highest payoff in the stage game may not always overlap with optimizing to be promoted. This might potentially lead to a trade-off dynamic in the analysis and would be interesting to explore since, it can be observed in reality that an approach to climb the social ladder may not always overlap with an approach to increase the well-being in the current level. I think it's also sensible to expect that higher levels of such social hierarchy would be populated with the players who play the action A, also due to the coordination structure of the game. Such an action that prevails on higher levels with higher frequency could be called \textit{hierarchically desirable.}
+
+It should be noted that the calculations above reflect the probability that a promotion happens conditional on the event that an action $s$ is being taken. For the transition probabilities, however, one would need to calculate the probability that an action s is chosen conditional on being promoted, demoted or keeping the position. The outcome space and it's relative frequency distribution that can be derived from the past histories and best response dynamics can be used to calculate these probabilities. Namely, for each outcome, the promoted/demoted/kept player and their respective action can be identified, and it can be checked in which such events the action $s$ prevails and what the relative frequency of these events are. Let 
+$p(s \mid \textit{h, promoted})$, $p(s\mid \textit{h, demoted})$ and $p_i(s \mid \textit{h, kept})$ denote these probabilities and similarly let $p_i(promoted\mid h)$, $p_i(demoted\mid h)$ and $p_i(kept\mid h)$ denote the conditional probabilities of being promoted, demoted or kept. It should be noted that the probabilities with the subscript $i$ are the events describing the situation restricted to player $i$ ($i$ is promoted, $i$ chooses s etc.) while the ones without the subscript represent the whole population of that level.
+
+Let $ h^z_j \in z $ denote state $z$'s $jth$ level history and $s^{z,j} = s(m_j) \in h^z_j$ denote last period's play at that level. Then
+\begin{align*}
+    P_{i}^0( s^{z',j} \mid z ) &= p_i(kept \mid h^z_j) \times p_i( s^{z',j} \mid h^z_j \textit{, kept})\\
+    &+ p_i(demoted \mid h^z_j) \times p(s^{z',j} \mid h^z_{j-1} \textit{, promoted}) \\
+   &+ p_i(promoted \mid h^z_j) \times p(s^{z',j}\mid h^z_{j+1} \textit{, demoted})
+\end{align*}
+
+is the conditional probability that action $s^{z',j}$ will appear on $i$'s position in the next period. The transition probability from state $z$ to $z'$ is then the probability that all the actions in the last components of all of $z'$ histories appear jointly, which amounts to
+\[ \mathbf{P}_{zz'}^0 = \prod\limits_{j=1}^{l} \prod\limits_{i=1}^{n} P_{i}^0( s^{z',j}_i \mid z )\]
+
+since all such events are independent. We will call this process unperturbed following Young. 
+
+\section*{Computational Results}
+
+Computational adaptation of the above 2x2 game with $m_1=m_2=2$, $k=1$ and $l=2$ leads to a Markov chain that is not irreducible but is aperiodic with two recurrent communication classes. These classes include the states where both players take action A  in all levels and periods -henceforth state A- and where they take action B in all levels and periods -henceforth state B-. It also has two stationary distributions, where in each of them the whole probability is given to one of these states. (See Figure 1)
 
 
 
-\begin{figure}[H]
-
+\begin{figure}
     \centering
-    \includegraphics[width=0.85\textwidth]{../python/figures/smoking_by_marital_status}
+    \subfigure[Only action A is played]{\includegraphics[width=0.45\textwidth]{image1.png}}
+    \hfill  % Add horizontal space between figures (optional)
+    \subfigure[Only action B is played]{\includegraphics[width=0.45\textwidth]{image2.png}}
 
-    \caption{\emph{Python:} Model predictions of the smoking probability over the
-        lifetime. Each colored line represents a case where marital status is fixed to one
-        of the values present in the data set.}
-    \label{fig:python-predictions}
+    \caption{Stationary distributions of the unperturbed process for the 2x2 game above with $m_1=m_2=2$, $k=1$ and $l=2$.}
 
 \end{figure}
 
+\paragraph{Regular Perturbations.}
+Given the definition in Young, I aim to find a regular perturbation of this process to analyze the asymptotic behaviour. An interesting candidate  would be the one, where with a small probability $\epsilon > 0$ the promotion process fails to select the best to promote due to technical difficulties or simply by institutional incapability to follow the moral conduct. In such cases, a player could be chosen randomly to be promoted or to be demoted. I have tried three different versions of such perturbation that unfortunately didn't seem to be regular perturbations. One method was to directly assign a uniform probability to each type of transition with a probability of $\epsilon$, which led to an irreducible and aperiodic Markov chain, although the stationary distribution didn't seem to converge to a distribution of the unperturbed process. Instead, for very small $\epsilon$, the distribution gives equal weight to both recurrent states of the unperturbed process. (See Figure 2) This is most likely signalling that $P^\epsilon$ was not of order $\epsilon^r$. (See Appendix of Young) On the other hand, perturbing the calculated probabilities slightly in the direction of the uniform distribution leads to converge to a distribution that gives all the probability to state A, but the process wasn't irreducible, while it was aperiodic. Another attempt was similar to Young's perturbation in terms of structure, where I defined another process where both the promoted/demoted player and actions by the players were chosen randomly. With probability $\epsilon$, one should have observed this purely chaotic process and the original unperturbed process otherwise. (See code appendix for the implementation) This process, like before, is also irreducible, but non-convergent.
 
-\begin{table}[!h]
-    \input{../python/tables/estimation_results.tex}
-    \caption{\label{tab:python-summary}\emph{Python:} Estimation results of the
-        linear Logistic regression.}
-\end{table}
+A different attempt was to perturb the probability of choosing s with the probability of it's complement event, which could have an interpretation of making mistakes on a very general level, like failure of transition in experience from one level to another or of keeping records within the level. This method also leads to an irreducible and aperiodic process but similarly, there is no converge of the distribution.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.45\linewidth]{image3.png}
+    \caption{Non-convergent stationary distribution of a perturbed process.}
+\end{figure}
+
+\paragraph{Minimum Stochastic Potential.}
+
+I did however applied a similar logic to that of Young's to calculate the resistance from one state to another to potentially calculate the states with minimum stochastic potential. It should be noted that resistance $r$ must correspond to the exponent of the order of the perturbed process ($\epsilon^r$), and I have currently no results to show that the resistances I calculate here complies with this assumption for some regular perturbation $P^\epsilon$. Nevertheless, the calculations are coherent with each other, and can easily be adapted if resistances should be calculated some other way.
+
+Here, resistance is simply how many \textit{mistakes} the unperturbed process would have to make to reach from one state to another. If a state is not a successor of another, then the resistance of this transition is infinity. Then, I create the graph of the recurrent communication classes (See Figure 3\footnote{Each block of the state is a hierarchical level, where each row is a component of the history at that level and each column is a player's action, all in increasing order. 1 = Action A; 2 = Action B}) and found out that one can actually reach from one to another with only one mistake each. It is in fact an interesting result but it could also be an artefact of the given parameters, since there are only two levels in the hierarchy.\footnote{It should be noted that under this parametrization, the insufficient information assumption of Young is not satisfied. However, I also have no reason to believe that this play will abide by that part of his theorem due to transitions between levels and the effect of other levels' plays on the histories. Higher parametrization is unfortunately not computationally feasible without a long runtime. Current runtime is around 4 minutes for the calculation of each transition matrix and state space grows exponentially both in the number of levels and the memory size.} The transitions are not direct and happen along the \textit{shortest paths} between the states. Interestingly, once we break out of a recurrent state, it doesn't seem to take any more mistakes to arrive at the other. 
+
+\begin{figure}
+            \centering
+            \includegraphics[width=0.6\linewidth]{rcc.png}
+            \caption{Recurrent communication classes of the 2x2 game with $m_1=m_2=2$, $k=1$ and $l=2$.}
+            \label{fig:rcc}
+        \end{figure}
+
+        
+\begin{figure}
+            \centering
+            \includegraphics[width=0.6\linewidth]{sp.png}
+            \caption{Example of a shortest path. (RCCs are red.)}
+            \label{fig:sp}
+        \end{figure}
+   
+
+Taking a closer look at the transition from state A to state B (See example in Figure 4), we start with a mistake (playing B) of Player 2 of the second (top) level. To understand the transition from here, it's helpful to think of an intermediary state that's not explicitly modelled and that involves the game being played before the social mobility takes place. On the bottom level, players must sample and thus must play the action A as best responses. On the top level, while player 2 also must sample and play A; player 1 might sample (and play) B 50\% of the time. If she does so, she will get demoted to the bottom level, and (by chance) to the place of the first player at that level. This also means that the player 1 of the bottom level is promoted to the place of the player 2 at the top level. Thus, the given state can be achieved without a mistake.
 
 
 
 
-% section introduction (end)
+For the stochastic potential, as suggested by Young, I applied the \citet{edmonds1967optimum}'s algorithm to find an optimum arborescence with minimum weight, which is plotted in Figure 5. A major short-coming of this algorithm is that, it fails to deliver all such arborescences, when multiple ones share the same weight, which might lead to unidentified states with minimum stochastic potential. An alternative is given by \citet{sorensen2005algorithm} that fully identifies all possible cases, from which, one can iterate to find all such states. As seen in Figure 6, there is a minimum arborescence for both stochastically stable states that has them in it's root. Hence, both states can be identified as having the minimum stochastic potential. It's also interesting to note that the stationary distribution of the \textit{non-regular perturbation} that doesn't converge to the unperturbed process, has exactly these two states in it's support, as Theorem 2 of Young would suggest in case of a regular perturbation.
+
+
+\begin{figure}
+        \centering
+        \includegraphics[width=0.45\linewidth]{arb.png}
+        \caption{Optimum arborescence of the Edmond's algorithm. (Root is red.)}
+        \label{fig:arb}
+    \end{figure}
+
+
+\begin{figure}
+    \centering
+    \subfigure[Root is where everyone always plays action A.]{\includegraphics[width=0.45\textwidth]{arb1.png}}
+    \hfill  % Add horizontal space between figures (optional)
+    \subfigure[Root is where everyone always plays action B.]{\includegraphics[width=0.45\textwidth]{arb2.png}}
+
+    \caption{Two of the minimum arborescences of the Sörensen-Janssens algorithm. (Roots are red.)}
+
+\end{figure}
+
+Code Appendix on \href{https://github.com/ecdogaroglu/Social-Hierarchies.git}{Github} (Under development.)
+\newpage
+
+
 
 
 

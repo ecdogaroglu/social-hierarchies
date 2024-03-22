@@ -7,7 +7,7 @@ import pickle
 import pytask
 
 from social_hierarchies.config import BLD
-from social_hierarchies.dynamics.graph import find_states_with_min_stoch_pot, ___index_to_state
+from social_hierarchies.dynamics.graph import find_states_with_min_stoch_pot, ___index_to_state, __find_root_index, compute_rcc_index
 from social_hierarchies.final.plot import (
     plot_stationary_distr,
     plot_rcc_graph,
@@ -149,22 +149,11 @@ def task_plot_edmonds_arboresence(
 
     plt.figure(8)
     pos = nx.spring_layout(arb, seed=7)
-    nx.draw(
-        arb,
-        pos=pos,
-        with_labels=True,
-        labels=labels,
-        font_weight="normal",
-        width=0.5,
-        arrows=True,
-        arrowsize=30,
-        margins=0.2,
-        node_color="white",
-        font_size=8,
-        node_size=1000,
-        connectionstyle="arc3, rad = 0.1",
-    )
-    nx.draw_networkx_edge_labels(arb, pos=pos, edge_labels=edge_labels)
+
+    colors = ["#1f78b4","#1f78b4", "red",]
+    nx.draw(arb, pos=pos, with_labels=True, labels=labels, node_size=10000, margins=0.2, font_size=12, font_weight="bold", node_color=colors, arrowsize=30)
+    nx.draw_networkx_edge_labels(arb, pos, edge_labels=edge_labels, label_pos=0.5, font_size=12)
+
     plt.savefig(produces)
 
 
@@ -186,6 +175,8 @@ def task_plot_multiple_min_arbs(
     k = parameters["k"]
     num_act = parameters["num_act"]
     payoffs = parameters["payoffs"]
+    rcc_index = compute_rcc_index(trans_matrix_un)
+
     G = nx.read_pajek(G_dir)
 
     arbs = find_states_with_min_stoch_pot(G, states, trans_matrix_un, k, num_act, payoffs)[
@@ -202,22 +193,17 @@ def task_plot_multiple_min_arbs(
         edge_labels = nx.get_edge_attributes(arbs[i], "weight")
         pos = nx.spring_layout(arbs[i], seed=7)
 
-        nx.draw(
-            arbs[i],
-            pos=pos,
-            with_labels=True,
-            labels=labels,
-            font_weight="normal",
-            width=0.5,
-            arrows=True,
-            arrowsize=30,
-            margins=0.2,
-            node_color="white",
-            font_size=8,
-            node_size=1000,
-            connectionstyle="arc3, rad = 0.1",
-        )
-        nx.draw_networkx_edge_labels(arbs[i], pos=pos, edge_labels=edge_labels)
+        root = __find_root_index(arbs[i],rcc_index)
+        
+        colors = []
+        for index in indices:
+            if index in root:
+                colors.append("red")
+            else:
+                colors.append("#1f78b4")
+        #colors = ["red", "#1f78b4", "#1f78b4"]
+        nx.draw(arbs[i], pos=pos, with_labels=True, labels=labels, node_size=10000, margins=0.2, font_size=12, font_weight="bold", node_color=colors, arrowsize=30)
+        nx.draw_networkx_edge_labels(arbs[i], pos, edge_labels=edge_labels, label_pos=0.5, font_size=14)
         plt.savefig(BLD / "python" / "figures" / f"arb_{i}.png")
 
     num_arbs = np.array(len(arbs))

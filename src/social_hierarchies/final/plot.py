@@ -9,6 +9,7 @@ from social_hierarchies.dynamics.graph import (
     _create_directed_graph,
     _create_rcc_graph,
     find_edmonds_arboresence,
+    _edges_sp_graph,
 )
 
 
@@ -65,6 +66,37 @@ def plot_rcc_graph(states, k, num_act, payoffs, trans_matrix_un):
     edge_labels = nx.get_edge_attributes(G_rcc, "weight")
 
     return G_rcc, labels, edge_labels
+
+
+def plot_shortest_path_example(states, k, num_act, payoffs):
+    """Create the plot for an example shortest path between the recurrent communication classes.
+
+    Args:
+        states (numpy.ndarray): Three dimensional array representing the state space of the stochastic process,
+                            where each state is a play history of size m.
+                            Dimensions are ((num_act**num_players)**m) x m x num_players
+        k (int): The sample size according to which play histories are sampled.
+        num_act (int): Number of actions in the game. Different number of actions for each player is not supported.
+        trans_matrix_un (numpy.ndarray): The transition matrix of the unperturbed process.
+
+    Returns:
+        networkx.classes.digraph.DiGraph : The directed graph of the unpurturbed process.
+        list : List of numpy arrays contatining the node labels.
+        dict : Numpy array containing the edge labels.
+
+    """
+    G = _create_directed_graph(states, k, num_act, payoffs)
+
+    G_sp_ex = nx.DiGraph()
+    G_sp_ex.add_weighted_edges_from(_edges_sp_graph(0,255,states,G, k, num_act, payoffs))
+
+    indices = list(G_sp_ex.nodes())
+    sp_labels = {}
+    for i in indices:
+        sp_labels[i] = states[i] + np.ones((states.shape[1], states.shape[2]))
+    sp_edge_labels = nx.get_edge_attributes(G_sp_ex, "weight")
+   
+    return G_sp_ex, sp_labels, sp_edge_labels
 
 
 def plot_edmonds_arboresence(states, k, num_act, payoffs, trans_matrix_un):

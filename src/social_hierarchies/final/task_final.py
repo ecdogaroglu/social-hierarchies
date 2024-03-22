@@ -4,7 +4,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import numpy as np
 import pickle
-
+import pytask
 
 from social_hierarchies.config import BLD
 from social_hierarchies.dynamics.graph import find_states_with_min_stoch_pot, ___index_to_state
@@ -12,12 +12,14 @@ from social_hierarchies.final.plot import (
     plot_stationary_distr,
     plot_rcc_graph,
     plot_edmonds_arboresence,
+    plot_shortest_path_example,
 )
 
 
 def task_plot_stationary_distr_unperturbed(
     states_dir=BLD / "python" / "game" / "states.npy",
     trans_matrix_un_dir=BLD / "python" / "dynamics" / "trans_matrix_un.npy",
+    produces=BLD / "python" / "figures" / "s_distr_un_0.png",
 ):
     """Plot the stationary distributions of the unperturbed process."""
 
@@ -28,7 +30,7 @@ def task_plot_stationary_distr_unperturbed(
 
     plt.figure(0)
     plt.plot(x, s_distr_0, color="k")
-    plt.savefig(BLD / "python" / "figures" / "s_distr_un_0.png")
+    plt.savefig(produces)
 
     x, s_distr_1 = plot_stationary_distr(states, trans_matrix_un, index=1)
 
@@ -46,7 +48,7 @@ def task_plot_stationary_distr_unperturbed(
 def task_plot_stationary_distr_perturbed(
     states_dir=BLD / "python" / "game" / "states.npy",
     trans_matrix_p_dir=BLD / "python" / "dynamics" / "trans_matrix_p.npy",
-    produces=BLD / "python" / "figures" / "s_distr.png",
+    produces=BLD / "python" / "figures" / "s_distr_p.png",
 ):
     """Plot the stationary distribution of the perturbed process."""
 
@@ -57,48 +59,6 @@ def task_plot_stationary_distr_perturbed(
 
     plt.figure(5)
     plt.plot(x, s_distr_p, color="k")
-    plt.savefig(produces)
-
-
-def task_plot_edmonds_arboresence(
-    states_dir=BLD / "python" / "game" / "states.npy",
-    trans_matrix_un_dir=BLD / "python" / "dynamics" / "trans_matrix_un.npy",
-    parameters_dir=BLD / "python" / "game" / "parameters.pkl",
-    produces=BLD / "python" / "figures" / "edmonds_arboresence.png",
-):
-    """Plot the Edmond's arboresence."""
-
-    with open(parameters_dir, "rb") as fp:
-        parameters = pickle.load(fp)
-
-    states = np.load(states_dir)
-    trans_matrix_un = np.load(trans_matrix_un_dir)
-    k = parameters["k"]
-    num_act = parameters["num_act"]
-    payoffs = parameters["payoffs"]
-
-    arb, labels, edge_labels = plot_edmonds_arboresence(
-        states, k, num_act, payoffs, trans_matrix_un
-    )
-
-    plt.figure(6)
-    pos = nx.spring_layout(arb, seed=7)
-    nx.draw(
-        arb,
-        pos=pos,
-        with_labels=True,
-        labels=labels,
-        font_weight="normal",
-        width=0.5,
-        arrows=True,
-        arrowsize=30,
-        margins=0.2,
-        node_color="white",
-        font_size=8,
-        node_size=1000,
-        connectionstyle="arc3, rad = 0.1",
-    )
-    nx.draw_networkx_edge_labels(arb, pos=pos, edge_labels=edge_labels)
     plt.savefig(produces)
 
 
@@ -123,7 +83,7 @@ def task_plot_G_rcc(
         states, k, num_act, payoffs, trans_matrix_un
     )
 
-    plt.figure(7)
+    plt.figure(6)
     pos = nx.spring_layout(G_rcc, seed=7)
     nx.draw(
         G_rcc,
@@ -142,6 +102,76 @@ def task_plot_G_rcc(
     )
     nx.draw_networkx_edge_labels(G_rcc, pos=pos, edge_labels=edge_labels, font_size=8)
     plt.savefig(produces)
+
+@pytask.mark.try_last
+def task_plot_G_shortest_path(
+    states_dir=BLD / "python" / "game" / "states.npy",
+    parameters_dir=BLD / "python" / "game" / "parameters.pkl",
+    produces=BLD / "python" / "figures" / "G_sp_ex.png",
+):
+    """Plot the shortest path between two recurrent communication classes."""
+
+    with open(parameters_dir, "rb") as fp:
+        parameters = pickle.load(fp)
+
+    states = np.load(states_dir)
+    k = parameters["k"]
+    num_act = parameters["num_act"]
+    payoffs = parameters["payoffs"]
+
+    G_sp_ex, sp_labels, sp_edge_labels = plot_shortest_path_example(
+        states, k, num_act, payoffs
+    )
+
+    plt.figure(7)
+    pos= nx.spring_layout(G_sp_ex, k=4, seed=23)
+    colors = ["red", "#1f78b4", "#1f78b4", "#1f78b4", "#1f78b4", "red"]
+    nx.draw(G_sp_ex, pos=pos, with_labels=True, labels=sp_labels, node_size=6000, margins=0.1, font_size=10, font_weight="bold",node_color=colors, arrowsize=15)
+    nx.draw_networkx_edge_labels(G_sp_ex, pos, edge_labels=sp_edge_labels, label_pos=0.5, font_size=12)
+    plt.savefig(produces)
+
+
+def task_plot_edmonds_arboresence(
+    states_dir=BLD / "python" / "game" / "states.npy",
+    trans_matrix_un_dir=BLD / "python" / "dynamics" / "trans_matrix_un.npy",
+    parameters_dir=BLD / "python" / "game" / "parameters.pkl",
+    produces=BLD / "python" / "figures" / "edmonds_arboresence.png",
+):
+    """Plot the Edmond's arboresence."""
+
+    with open(parameters_dir, "rb") as fp:
+        parameters = pickle.load(fp)
+
+    states = np.load(states_dir)
+    trans_matrix_un = np.load(trans_matrix_un_dir)
+    k = parameters["k"]
+    num_act = parameters["num_act"]
+    payoffs = parameters["payoffs"]
+
+    arb, labels, edge_labels = plot_edmonds_arboresence(
+        states, k, num_act, payoffs, trans_matrix_un
+    )
+
+    plt.figure(8)
+    pos = nx.spring_layout(arb, seed=7)
+    nx.draw(
+        arb,
+        pos=pos,
+        with_labels=True,
+        labels=labels,
+        font_weight="normal",
+        width=0.5,
+        arrows=True,
+        arrowsize=30,
+        margins=0.2,
+        node_color="white",
+        font_size=8,
+        node_size=1000,
+        connectionstyle="arc3, rad = 0.1",
+    )
+    nx.draw_networkx_edge_labels(arb, pos=pos, edge_labels=edge_labels)
+    plt.savefig(produces)
+
 
 
 def task_plot_multiple_min_arbs(

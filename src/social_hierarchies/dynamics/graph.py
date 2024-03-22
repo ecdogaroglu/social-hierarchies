@@ -4,7 +4,7 @@ import networkx as nx
 import math
 import numpy as np
 
-from social_hierarchies.game.game import _best_response_prob
+from social_hierarchies.dynamics.probabilities import pl_pos_is_s
 from social_hierarchies.dynamics.markov_chain import compute_rcc_index, ___index_to_state
 
 
@@ -85,18 +85,27 @@ def __resistance(source, target, k, num_act, payoffs):
         int or float : Sum of mistakes (int); or infinity (float) if target is not a successor of the source.
 
     """
-    if (source[1:] == target[:-1]).all():
-        s = target[-1]
+    is_suc = []
+
+    cond=False
+    for i in range(source.shape[0]):
+        is_suc.append((source[i][1:] == target[i][:-1]).all())
+        cond = sum(is_suc) == source.shape[0]
+    
+    if cond:
         mistakes = []
-        for i in range(s.shape[0]):
-            mistakes.append(
-                _best_response_prob(source, s[i], i, k, num_act, payoffs) == 0
-            )
-        res = int(sum(mistakes))
-    else:
+        for i in range(source.shape[0]):
+            s = target[i][-1]
+            for j in range(s.shape[0]):        
+                mistakes.append(pl_pos_is_s(j,i,s[j],payoffs,source, k, num_act) == 0)
+            res = sum(mistakes)
+
+    if not cond:
         res = math.inf
 
     return res
+
+
 
 
 def _create_rcc_graph(states, k, num_act, rcc_index, G, payoffs):
@@ -275,3 +284,16 @@ def __find_root_state(states, arb, rcc_index):
     root_states = ___index_to_state(states, root_index)
 
     return root_states
+
+
+def _edges_sp_graph(source,target, states, G, k, num_act, payoffs):
+    sp = nx.algorithms.shortest_path(G, source=source, target=target, weight="weight")
+    res = 0
+    plot = []
+    for i in range(len(sp)-1):
+        pre = sp[i]
+        suc = sp[i + 1]
+        res = __resistance(states[pre],states[suc], k, num_act, payoffs)
+        plot.append((pre,suc,res))
+    
+    return plot

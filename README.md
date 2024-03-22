@@ -7,7 +7,7 @@
 ## Abstract
 
 This paper explores the dynamics of social hierarchies, where agents possess strategic decision making abilities. Such abilities allow the agents to "have a say" on their lifetime destiny by responding optimally to the past play, while they are still subject to limitations of their social environment.
-I deploy the adaptive of Young (1993) in a social hierarchy
+I deploy the adaptive play of Young (1993) in a social hierarchy
 structure, give a novel characterization of social mobility dynamics in a framework with sophisticated
 decision making abilities and model the resulting stochastic process as a Markov chain.
 Then I employ several perturbations of the stochastic process and use graph theory to explore 

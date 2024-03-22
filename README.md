@@ -44,7 +44,7 @@ This module handles the creation of the state space from the given parameters an
 that are fundamental for the characterization of the stochastic processes.
 
 
-## probabilities.py
+### probabilities.py
 
 This module characterizes the social mobility dynamics by computing the corresponding transition probabilities with the help of best response probabilities.
 

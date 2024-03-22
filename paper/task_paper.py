@@ -5,7 +5,7 @@ import pytask
 from pytask_latex import compilation_steps as cs
 from social_hierarchies.config import BLD, PAPER_DIR
 
-documents = ["social_hierarchies", "social_hierarchies_pres"]
+documents = ["social_hierarchies"]
 
 for document in documents:
 

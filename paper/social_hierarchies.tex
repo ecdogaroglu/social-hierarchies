@@ -14,8 +14,9 @@
 \usepackage{xfrac}
 \usepackage{setspace}
 \usepackage[dvipsnames]{xcolor}
-\usepackage{subcaption}
+%\usepackage{subcaption}
 \usepackage{minibox}
+\usepackage{subfigure}
 % \usepackage{pdf14} % Enable for Manuscriptcentral -- can't handle pdf 1.5
 % \usepackage{endfloat} % Enable to move tables / figures to the end. Useful for some
 % submissions.
@@ -59,13 +60,11 @@
 
 \begin{document}
 
-\title{Social Hierarchies with Strategic Ability\thanks{Ege Can Dogaroglu, University of Bonn. Email: \href{mailto:ecdogaroglu@gmail.com}{\nolinkurl{ecdogaroglu [at] gmail [dot] com}}.}}
+\title{Social Hierarchies with Strategic Ability\thanks{Ege Can Doğaroğlu, University of Bonn. Email: \href{mailto:ecdogaroglu@gmail.com}{\nolinkurl{ecdogaroglu@gmail.com}}.}}
 
-\author{Ege Can Dogaroglu}
+\author{Ege Can Doğaroğlu}
 
 \date{
-    {\bf Preliminary -- please do not quote}
-    \\[1ex]
     \today
 }
 
@@ -73,10 +72,19 @@
 
 
 \begin{abstract}
-    Some abstract here.
+    This paper explores the dynamics of social hierarchies, where agents possess strategic decision making abilities. Such abilities allow the agents to "have a say" on their lifetime destiny by responding optimally to the past play, while they are still subject to limitations of their social environment.
+    I deploy the \textit{adaptive play} of \Citet{young1993evolution} in a social hierarchy
+    structure, give a novel characterization of social mobility dynamics in a framework with sophisticated
+    decision making abilities and model the resulting stochastic process as a Markov chain.
+    Then I employ several perturbations of the stochastic process and use graph theory to explore 
+    the asymptotic behavior of this social system.
+
+    Code Appendix can be found on \href{https://github.com/ecdogaroglu/social-hierarchies}{GitHub}.
+    
 \end{abstract}
 
 \clearpage
+
 
 
 \section*{Introduction}
@@ -89,6 +97,9 @@ Social mobility among different levels of the social hierarchy is governed by a 
 As of now, I'm uncertain whether birth and death dynamics should be included. If this is the case however, I would wish to allow introducing birth to every level of the hierarchy as opposed to Vega, since I intend to model a general social structure and not an industrial organization.
 
 Regarding the analysis, I intend to follow the perturbation technique that's introduced by Young to identify the stochastically stable conventions. To do so, one needs to find a \textit{regular perturbation} of the original Markov chain. I am also interested to see whether the stochastically stable conventions vary within the social levels. What leads me to think that there might be such a variation is that, the play considered here actually differs from the adaptive play due to the social mobility dynamics. More precisely, the transitioning agents   carry their action with them during the transition. In other words, winning actions and their wisdom are carried to the top one at a time, while the losing actions accumulate in the bottom. Without forced promotion / demotion one could also argue that social mobility should be less possible as the process evolves due to this reason. However, conditioning the promotion process to between level success seems to be a challenging task. One other feature to think about might be allowing for different games at each level, maybe one where payoffs are linearly scaled towards the top levels to increase the aggregate risk of the play.
+
+
+
 
 \section*{The Model}
 There are l different hierarchical levels where each level includes n agents. A weakly acyclic n player normal form game is played each period once at each level. The game history is separate for each level and has the size $m_l$. At the beginning of each period, each class gathers their own sample from this history, which is of size $k_l$. Thus in each period and at each level one game is being played and for each game players follow the adaptive play. 
@@ -141,30 +152,68 @@ is the conditional probability that action $s^{z',j}$ will appear on $i$'s posit
 
 since all such events are independent. We will call this process unperturbed following Young. 
 
+
+
 \section*{Computational Results}
 
-Computational adaptation of the above 2x2 game with $m_1=m_2=2$, $k=1$ and $l=2$ leads to a Markov chain that is not irreducible but is aperiodic with two recurrent communication classes. These classes include the states where both players take action A  in all levels and periods -henceforth state A- and where they take action B in all levels and periods -henceforth state B-. It also has two stationary distributions, where in each of them the whole probability is given to one of these states. (See Figure 1)
+Computational adaptation of the above 2x2 game with $m_1=m_2=2$, $k=1$ and $l=2$ leads to 
+a Markov chain that is not irreducible but is aperiodic with three recurrent communication 
+classes. Two of these classes are the states where both players take action A in all levels 
+and periods -henceforth state A-  and where they take action B in all levels and periods 
+-henceforth state B- which also correspond to pure strategy strict Nash equilibria of the 
+given game. The third state is, interestingly, where player 1 on top level samples Action B, 
+player 2 on top level samples Action A; player 1 on bottom level samples action A and player 2
+on bottom level samples Action B, with certainty -henceforth state C-. This state leads to the situation where 
+player 1s recurrently switch positions with each other while player 2s keep their position.
+It's notable that the symmetric situation for player 2 doesn't come up as a recurrent state
+and it might be due to a calculation error. Thus the process has three stationary distributions
+given full weight to each of these classes that can be seen in Figure 1.
 
 
 
 \begin{figure}
     \centering
-    \subfigure[Only action A is played]{\includegraphics[width=0.45\textwidth]{image1.png}}
+    \subfigure[State A]{\includegraphics[width=0.45\textwidth]{../bld/python/figures/s_distr_un_0.png}}
     \hfill  % Add horizontal space between figures (optional)
-    \subfigure[Only action B is played]{\includegraphics[width=0.45\textwidth]{image2.png}}
+    \subfigure[State B]{\includegraphics[width=0.45\textwidth]{../bld/python/figures/s_distr_un_1.png}}
+    \hfill  % Add horizontal space between figures (optional)
+    \subfigure[State C]{\includegraphics[width=0.45\textwidth]{../bld/python/figures/s_distr_un_2.png}}
 
     \caption{Stationary distributions of the unperturbed process for the 2x2 game above with $m_1=m_2=2$, $k=1$ and $l=2$.}
 
 \end{figure}
 
 \paragraph{Regular Perturbations.}
-Given the definition in Young, I aim to find a regular perturbation of this process to analyze the asymptotic behaviour. An interesting candidate  would be the one, where with a small probability $\epsilon > 0$ the promotion process fails to select the best to promote due to technical difficulties or simply by institutional incapability to follow the moral conduct. In such cases, a player could be chosen randomly to be promoted or to be demoted. I have tried three different versions of such perturbation that unfortunately didn't seem to be regular perturbations. One method was to directly assign a uniform probability to each type of transition with a probability of $\epsilon$, which led to an irreducible and aperiodic Markov chain, although the stationary distribution didn't seem to converge to a distribution of the unperturbed process. Instead, for very small $\epsilon$, the distribution gives equal weight to both recurrent states of the unperturbed process. (See Figure 2) This is most likely signalling that $P^\epsilon$ was not of order $\epsilon^r$. (See Appendix of Young) On the other hand, perturbing the calculated probabilities slightly in the direction of the uniform distribution leads to converge to a distribution that gives all the probability to state A, but the process wasn't irreducible, while it was aperiodic. Another attempt was similar to Young's perturbation in terms of structure, where I defined another process where both the promoted/demoted player and actions by the players were chosen randomly. With probability $\epsilon$, one should have observed this purely chaotic process and the original unperturbed process otherwise. (See code appendix for the implementation) This process, like before, is also irreducible, but non-convergent.
+Given the definition in Young, I aim to find a regular perturbation of this 
+process to analyze the asymptotic behaviour. An interesting candidate would be 
+the one, where with a small probability $\epsilon > 0$ the promotion process fails 
+to select the best to promote due to technical difficulties or simply by 
+institutional incapability to follow the moral conduct. In such cases, a player 
+could be chosen randomly to be promoted or to be demoted. I have tried three 
+different versions of such perturbation that unfortunately didn't seem to be 
+regular perturbations. One method was to directly assign a uniform probability 
+to each type of transition with a probability of $\epsilon$, which led to an 
+irreducible and aperiodic Markov chain, although the stationary distribution 
+didn't seem to converge to a distribution of the unperturbed process. Instead, 
+for very small $\epsilon$, the distribution gives positive probability to each
+recurrent commmunication class, where state A and state B have equal probabilities,
+which is higher that the probability of state C. (See Figure 2) This is most likely signalling 
+that $P^\epsilon$ was not of order $\epsilon^r$. (See Appendix of Young) On the 
+other hand, perturbing the calculated probabilities slightly in the direction of 
+the uniform distribution leads to converge to a distribution that gives all the 
+probability to state A, but the process wasn't irreducible, while it was aperiodic.
+Another attempt was similar to Young's perturbation in terms of structure, where
+I defined another process where both the promoted/demoted player and actions by 
+the players were chosen randomly. With probability $\epsilon$, one should have 
+observed this purely chaotic process and the original unperturbed process 
+otherwise. (See code appendix for the implementation) This process, like before,
+is also irreducible, but non-convergent.
 
 A different attempt was to perturb the probability of choosing s with the probability of it's complement event, which could have an interpretation of making mistakes on a very general level, like failure of transition in experience from one level to another or of keeping records within the level. This method also leads to an irreducible and aperiodic process but similarly, there is no converge of the distribution.
 
 \begin{figure}
     \centering
-    \includegraphics[width=0.45\linewidth]{image3.png}
+    \includegraphics[width=0.45\linewidth]{../bld/python/figures/s_distr_p.png}
     \caption{Non-convergent stationary distribution of a perturbed process.}
 \end{figure}
 
@@ -176,52 +225,66 @@ Here, resistance is simply how many \textit{mistakes} the unperturbed process wo
 
 \begin{figure}
             \centering
-            \includegraphics[width=0.6\linewidth]{rcc.png}
+            \includegraphics[width=0.45\linewidth]{../bld/python/figures/G_rcc.png}
             \caption{Recurrent communication classes of the 2x2 game with $m_1=m_2=2$, $k=1$ and $l=2$.}
             \label{fig:rcc}
         \end{figure}
 
         
-\begin{figure}
-            \centering
-            \includegraphics[width=0.6\linewidth]{sp.png}
-            \caption{Example of a shortest path. (RCCs are red.)}
-            \label{fig:sp}
-        \end{figure}
-   
 
 Taking a closer look at the transition from state A to state B (See example in Figure 4), we start with a mistake (playing B) of Player 2 of the second (top) level. To understand the transition from here, it's helpful to think of an intermediary state that's not explicitly modelled and that involves the game being played before the social mobility takes place. On the bottom level, players must sample and thus must play the action A as best responses. On the top level, while player 2 also must sample and play A; player 1 might sample (and play) B 50\% of the time. If she does so, she will get demoted to the bottom level, and (by chance) to the place of the first player at that level. This also means that the player 1 of the bottom level is promoted to the place of the player 2 at the top level. Thus, the given state can be achieved without a mistake.
 
+\begin{figure}
+    \centering
+    \includegraphics[width=0.6\linewidth]{../bld/python/figures/G_sp_ex.png}
+    \caption{Example of a shortest path. (RCCs are red.)}
+    \label{fig:sp}
+\end{figure}
 
 
 
-For the stochastic potential, as suggested by Young, I applied the \citet{edmonds1967optimum}'s algorithm to find an optimum arborescence with minimum weight, which is plotted in Figure 5. A major short-coming of this algorithm is that, it fails to deliver all such arborescences, when multiple ones share the same weight, which might lead to unidentified states with minimum stochastic potential. An alternative is given by \citet{sorensen2005algorithm} that fully identifies all possible cases, from which, one can iterate to find all such states. As seen in Figure 6, there is a minimum arborescence for both stochastically stable states that has them in it's root. Hence, both states can be identified as having the minimum stochastic potential. It's also interesting to note that the stationary distribution of the \textit{non-regular perturbation} that doesn't converge to the unperturbed process, has exactly these two states in it's support, as Theorem 2 of Young would suggest in case of a regular perturbation.
-
+For the stochastic potential, as suggested by Young, I applied the 
+\citet{edmonds1967optimum}'s algorithm to find an optimum arborescence 
+with minimum weight, which is plotted in Figure 5. A major short-coming of 
+this algorithm is that, it fails to deliver all such arborescences, when 
+multiple ones share the same weight, which might lead to unidentified states 
+with minimum stochastic potential. Here, for example, algorithm only indentifies 
+the state C as having the minimum stochastic potential, since it's the root state 
+of the minimum arborescence.
 
 \begin{figure}
-        \centering
-        \includegraphics[width=0.45\linewidth]{arb.png}
-        \caption{Optimum arborescence of the Edmond's algorithm. (Root is red.)}
-        \label{fig:arb}
-    \end{figure}
+    \centering
+    \includegraphics[width=0.45\linewidth]{../bld/python/figures/edmonds_arboresence.png}
+    \caption{Optimum arborescence of the Edmond's algorithm. (Root is red.)}
+    \label{fig:arb}
+\end{figure}
+
+
+An alternative is given by 
+\citet{sorensen2005algorithm} that fully identifies all possible cases, 
+from which, one can iterate to find all such states. As seen in Figure 6, 
+there is a minimum arborescence for all stochastically stable states that 
+has them in it's root. Hence, all of these states can be identified as having the 
+minimum stochastic potential. It's also interesting to note that the 
+stationary distribution of the \textit{non-regular perturbation} that doesn't
+converge to the unperturbed process, has exactly these two states in it's support,
+as Theorem 2 of Young would suggest in case of a regular perturbation.
 
 
 \begin{figure}
     \centering
-    \subfigure[Root is where everyone always plays action A.]{\includegraphics[width=0.45\textwidth]{arb1.png}}
+    \subfigure[State C is root.]{\includegraphics[width=0.3\textwidth]{../bld/python/figures/arb_0.png}}
     \hfill  % Add horizontal space between figures (optional)
-    \subfigure[Root is where everyone always plays action B.]{\includegraphics[width=0.45\textwidth]{arb2.png}}
-
-    \caption{Two of the minimum arborescences of the Sörensen-Janssens algorithm. (Roots are red.)}
+    \subfigure[State B is root.]{\includegraphics[width=0.3\textwidth]{../bld/python/figures/arb_1.png}}
+    \hfill  % Add horizontal space between figures (optional)
+    \subfigure[State A is root.]{\includegraphics[width=0.3\textwidth]{../bld/python/figures/arb_2.png}}
+    
+    \caption{Three of the minimum arborescences of the Sörensen-Janssens algorithm. (Roots are red.)}
 
 \end{figure}
 
-Code Appendix on \href{https://github.com/ecdogaroglu/Social-Hierarchies.git}{Github} (Under development.)
+
 \newpage
-
-
-
-
 
 \setstretch{1}
 \printbibliography
@@ -233,5 +296,8 @@ Code Appendix on \href{https://github.com/ecdogaroglu/Social-Hierarchies.git}{Gi
 % The chngctr package is needed for the following lines.
 % \counterwithin{table}{section}
 % \counterwithin{figure}{section}
+
+
+
 
 \end{document}
